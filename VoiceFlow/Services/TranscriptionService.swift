@@ -7,14 +7,11 @@
 
 import Foundation
 import AVFoundation
-
-// NOTE: WhisperKit dependency needs to be added to the Xcode project
-// Add package dependency: https://github.com/argmaxinc/WhisperKit
-// import WhisperKit
+import WhisperKit
 
 @MainActor
 class TranscriptionService: ObservableObject {
-    // private var whisperKit: WhisperKit?
+    private var whisperKit: WhisperKit?
     private var isInitialized = false
     
     @Published var modelLoadingProgress: Double = 0.0
@@ -31,77 +28,93 @@ class TranscriptionService: ObservableObject {
     private func initializeWhisperKit() async {
         print("TranscriptionService: Initializing WhisperKit...")
         isModelLoading = true
+        modelLoadingProgress = 0.1
         
-        // Simulate model loading progress
-        for i in 0...100 {
-            modelLoadingProgress = Double(i) / 100.0
-            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms delay
-        }
-        
-        /*
-        // Actual WhisperKit initialization (uncomment when dependency is added):
         do {
-            whisperKit = try await WhisperKit()
+            // Initialize WhisperKit with explicit model configuration
+            print("TranscriptionService: Creating WhisperKit instance with model...")
+            modelLoadingProgress = 0.3
+            
+            // Try to initialize with a specific small model first
+            whisperKit = try await WhisperKit(model: "base", modelRepo: "argmaxinc/whisperkit-coreml")
+            
+            modelLoadingProgress = 0.7
+            print("TranscriptionService: WhisperKit instance created, finalizing setup...")
+            
+            // Allow some time for the model to fully load
+            try? await Task.sleep(nanoseconds: 3_000_000_000) // 3 seconds
+            
             isInitialized = true
-            print("TranscriptionService: WhisperKit initialized successfully")
+            isModelLoading = false
+            modelLoadingProgress = 1.0
+            print("TranscriptionService: WhisperKit initialized successfully with base model")
         } catch {
             print("TranscriptionService: Failed to initialize WhisperKit: \(error)")
-            throw VoiceFlowError.transcriptionServiceInitFailed
+            print("TranscriptionService: Error details: \(error.localizedDescription)")
+            isModelLoading = false
+            isInitialized = false
+            modelLoadingProgress = 0.0
+            whisperKit = nil
         }
-        */
-        
-        // Simulated initialization
-        isInitialized = true
-        isModelLoading = false
-        print("TranscriptionService: WhisperKit simulation initialized")
     }
     
     // MARK: - Transcription
     
     func transcribeAudio(from url: URL) async throws -> String {
-        guard isInitialized else {
-            throw VoiceFlowError.transcriptionServiceNotReady
+        print("TranscriptionService: Starting transcription for file: \(url.lastPathComponent)")
+        print("TranscriptionService: File path: \(url.path)")
+        print("TranscriptionService: File size: \(getFileSize(url: url)) bytes")
+        print("TranscriptionService: isInitialized = \(isInitialized), whisperKit = \(whisperKit != nil)")
+        
+        // Check if audio file exists and has content
+        let fileManager = FileManager.default
+        guard fileManager.fileExists(atPath: url.path) else {
+            print("TranscriptionService: Audio file does not exist")
+            return "Audio file not found. Please try recording again."
         }
         
-        print("TranscriptionService: Starting transcription for file: \(url.lastPathComponent)")
+        let fileSize = getFileSize(url: url)
+        if fileSize < 1000 { // Less than 1KB probably means no audio
+            print("TranscriptionService: Audio file too small (\(fileSize) bytes), likely no audio recorded")
+            return "Recording too short or empty. Please record for at least 1-2 seconds."
+        }
         
-        /*
-        // Actual WhisperKit transcription (uncomment when dependency is added):
-        guard let whisperKit = whisperKit else {
-            throw VoiceFlowError.transcriptionServiceNotReady
+        // If WhisperKit isn't ready, fall back to simulation for now
+        guard isInitialized, let whisperKit = whisperKit else {
+            print("TranscriptionService: WhisperKit not ready, using fallback simulation")
+            return await simulateTranscription(for: url)
         }
         
         do {
-            let transcriptionResult = try await whisperKit.transcribe(audioPath: url.path)
-            return transcriptionResult.text
+            let transcriptionResults = try await whisperKit.transcribe(audioPath: url.path)
+            let transcribedText = transcriptionResults.map { $0.text }.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            print("TranscriptionService: Raw transcription results: \(transcriptionResults)")
+            print("TranscriptionService: Combined text: '\(transcribedText)'")
+            
+            // Check if WhisperKit detected only music/noise or empty result
+            if transcribedText.isEmpty || transcribedText.lowercased().contains("[music]") || transcribedText == "[Music]" {
+                print("TranscriptionService: Detected music/noise or empty - possibly no clear speech")
+                return "No clear speech detected. Please speak more clearly and try again."
+            }
+            
+            print("TranscriptionService: Transcription completed: '\(transcribedText)'")
+            return transcribedText
         } catch {
-            print("TranscriptionService: Transcription failed: \(error)")
-            throw VoiceFlowError.transcriptionFailed
+            print("TranscriptionService: Transcription failed with error: \(error)")
+            print("TranscriptionService: Falling back to simulation")
+            return await simulateTranscription(for: url)
         }
-        */
-        
-        // Simulated transcription for development
-        return await simulateTranscription(for: url)
     }
     
     private func simulateTranscription(for url: URL) async -> String {
-        // Simulate processing time based on file size
-        let fileSize = getFileSize(url: url)
-        let processingTime = min(max(Double(fileSize) / 100000.0, 1.0), 5.0) // 1-5 seconds
+        // Simulate processing time
+        try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
         
-        try? await Task.sleep(nanoseconds: UInt64(processingTime * 1_000_000_000))
-        
-        // Return simulated transcription
-        let sampleTexts = [
-            "Hello, this is a test transcription of your audio recording.",
-            "The quick brown fox jumps over the lazy dog. This is a sample transcription.",
-            "Voice Flow has successfully transcribed your speech using advanced AI technology.",
-            "This is a longer sample transcription that demonstrates how the system handles multiple sentences and phrases in a single audio recording.",
-            "Welcome to Voice Flow, where your voice becomes text with incredible accuracy and speed."
-        ]
-        
-        return sampleTexts.randomElement() ?? "Transcription completed successfully."
+        // Return a realistic fallback message
+        return "Transcription simulation - WhisperKit model is still loading or encountered an error. Please try again in a moment."
     }
+    
     
     // MARK: - Utility Methods
     
@@ -121,7 +134,7 @@ class TranscriptionService: ObservableObject {
     func resetService() async {
         isInitialized = false
         modelLoadingProgress = 0.0
-        // whisperKit = nil
+        whisperKit = nil
         await initializeWhisperKit()
     }
 }

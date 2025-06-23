@@ -30,9 +30,9 @@ enum AppState: String, CaseIterable, CustomStringConvertible {
     
     var canRecord: Bool {
         switch self {
-        case .idle, .transcribed, .processed:
+        case .idle, .recording, .transcribed, .processed:
             return true
-        case .recording, .transcribing, .processingLLM:
+        case .transcribing, .processingLLM:
             return false
         }
     }

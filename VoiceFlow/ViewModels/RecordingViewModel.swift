@@ -132,18 +132,23 @@ class RecordingViewModel: ObservableObject {
         if let recordingURL = audioRecorder.stopRecording() {
             currentRecordingURL = recordingURL
             currentState = .transcribing
+            print("ViewModel: Recording stopped, starting transcription for: \(recordingURL)")
             
             // Start actual transcription
             Task {
                 do {
+                    print("ViewModel: Calling transcription service...")
                     let transcribedText = try await transcriptionService.transcribeAudio(from: recordingURL)
+                    print("ViewModel: Transcription service returned: '\(transcribedText)'")
                     completeTranscription(text: transcribedText)
                 } catch {
+                    print("ViewModel: Transcription failed with error: \(error)")
                     handleError(error)
                     NotificationHelper.shared.showTranscriptionErrorNotification()
                 }
             }
         } else {
+            print("ViewModel: Failed to get recording URL")
             handleError(VoiceFlowError.recordingSetupFailed)
         }
     }
@@ -154,9 +159,10 @@ class RecordingViewModel: ObservableObject {
     }
     
     func completeTranscription(text: String) {
-        print("ViewModel: Transcription completed")
+        print("ViewModel: Transcription completed with text: '\(text)'")
         transcribedText = text
         currentState = .transcribed
+        print("ViewModel: State changed to transcribed, transcribedText = '\(transcribedText)'")
     }
     
     func startLLMProcessing() {
