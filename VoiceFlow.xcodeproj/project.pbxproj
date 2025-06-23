@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C6B7F8222E0987120054FEA2 /* voiceflow-spec.md in Resources */ = {isa = PBXBuildFile; fileRef = C6B7F8212E0987120054FEA2 /* voiceflow-spec.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C6B7F8052E095A970054FEA2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		C6B7F7F42E095A950054FEA2 /* VoiceFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6B7F8042E095A970054FEA2 /* VoiceFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoiceFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6B7F80E2E095A970054FEA2 /* VoiceFlowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoiceFlowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C6B7F8212E0987120054FEA2 /* voiceflow-spec.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "voiceflow-spec.md"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +84,7 @@
 				C6B7F8072E095A970054FEA2 /* VoiceFlowTests */,
 				C6B7F8112E095A970054FEA2 /* VoiceFlowUITests */,
 				C6B7F7F52E095A950054FEA2 /* Products */,
+				C6B7F8212E0987120054FEA2 /* voiceflow-spec.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -212,6 +218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C6B7F8222E0987120054FEA2 /* voiceflow-spec.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
