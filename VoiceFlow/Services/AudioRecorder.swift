@@ -245,13 +245,13 @@ class AudioRecorder: ObservableObject {
     
     // MARK: - File Management
     
-    private func createRecordingURL() -> URL {
+    func createRecordingURL() -> URL {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let timestamp = Int(Date().timeIntervalSince1970)
         return documentsPath.appendingPathComponent("recording_\(timestamp).wav")
     }
     
-    private func cleanupOldRecordings() {
+    func cleanupOldRecordings() {
         guard let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             return
         }
