@@ -6,27 +6,25 @@
 //
 
 import SwiftUI
-import SwiftData
 
 @main
 struct VoiceFlowApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-
     var body: some Scene {
-        WindowGroup {
+        WindowGroup("Voice Flow") {
             ContentView()
+                .frame(width: 400, height: 530)
+                .onAppear {
+                    if let window = NSApplication.shared.windows.first {
+                        window.level = .floating
+                        window.styleMask.remove(.resizable)
+                    }
+                }
         }
-        .modelContainer(sharedModelContainer)
+        .windowResizability(.contentSize)
+        .defaultSize(width: 400, height: 530)
+        .windowStyle(.titleBar)
+        .commands {
+            CommandGroup(replacing: .newItem) { }
+        }
     }
 }
