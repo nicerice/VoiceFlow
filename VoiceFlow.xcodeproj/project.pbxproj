@@ -118,6 +118,7 @@
 			);
 			name = VoiceFlow;
 			packageProductDependencies = (
+				C6B7F8242E098A120054FEA2 /* WhisperKit */,
 			);
 			productName = VoiceFlow;
 			productReference = C6B7F7F42E095A950054FEA2 /* VoiceFlow.app */;
@@ -201,6 +202,9 @@
 			);
 			mainGroup = C6B7F7EB2E095A950054FEA2;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C6B7F8232E098A120054FEA2 /* XCRemoteSwiftPackageReference "WhisperKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C6B7F7F52E095A950054FEA2 /* Products */;
 			projectDirPath = "";
@@ -404,7 +408,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VoiceFlow/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -430,7 +435,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VoiceFlow/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -550,6 +556,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C6B7F8232E098A120054FEA2 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C6B7F8242E098A120054FEA2 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C6B7F8232E098A120054FEA2 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C6B7F7EC2E095A950054FEA2 /* Project object */;
 }

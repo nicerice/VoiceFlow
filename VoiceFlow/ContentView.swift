@@ -9,9 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
-    @State private var transcribedText = ""
-    @State private var isRecording = false
-    @State private var isLoading = false
+    @StateObject private var viewModel = RecordingViewModel()
     
     var body: some View {
         VStack(spacing: 20) {
@@ -23,8 +21,10 @@ struct ContentView: View {
             
             // Main content area
             TextDisplayView(
-                text: $transcribedText,
-                isLoading: $isLoading
+                text: .constant(viewModel.currentText),
+                isLoading: .constant(viewModel.isLoading),
+                placeholderText: viewModel.placeholderText,
+                loadingMessage: viewModel.loadingMessage
             )
             .frame(maxHeight: .infinity)
             
@@ -34,43 +34,53 @@ struct ContentView: View {
                     action: {
                         copyToClipboard()
                     },
-                    isEnabled: !transcribedText.isEmpty && !isLoading
+                    isEnabled: !viewModel.currentText.isEmpty && !viewModel.isLoading
                 )
                 
                 RecordButton(
-                    isRecording: $isRecording,
+                    isRecording: .constant(viewModel.isRecording),
                     action: {
                         toggleRecording()
                     }
                 )
-                .disabled(isLoading)
+                .disabled(!viewModel.canRecord)
                 
                 MagicWandButton(
                     action: {
-                        processMagicWand()
+                        viewModel.startLLMProcessing()
                     },
-                    isEnabled: !transcribedText.isEmpty && !isLoading
+                    isEnabled: viewModel.canProcessLLM,
+                    isProcessing: viewModel.currentState == .processingLLM
                 )
             }
             .padding(.bottom, 10)
             
-            // Test buttons (development only)
+            // Debug state display
             #if DEBUG
-            HStack {
-                Button("Add Sample Text") {
-                    transcribedText = "This is a sample transcription text for testing purposes. It demonstrates how the text display looks with actual content."
-                }
-                .font(.caption)
+            VStack(spacing: 5) {
+                Text("Current State: \(viewModel.currentState.description)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
                 
-                Button("Clear Text") {
-                    transcribedText = ""
+                HStack {
+                    Button("Sample Text") {
+                        viewModel.completeTranscription(text: "This is a sample transcription for testing.")
+                    }
+                    .font(.caption)
+                    
+                    Button("Reset") {
+                        viewModel.reset()
+                    }
+                    .font(.caption)
+                    
+                    Button("Force Transcribe") {
+                        viewModel.startTranscription()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            viewModel.completeTranscription(text: "Force transcribed text")
+                        }
+                    }
+                    .font(.caption)
                 }
-                .font(.caption)
-                
-                Button("Toggle Loading") {
-                    isLoading.toggle()
-                }
-                .font(.caption)
             }
             .padding(.bottom, 5)
             #endif
@@ -78,42 +88,27 @@ struct ContentView: View {
         .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(colorScheme == .dark ? Color.black : Color.white)
+        .alert("Error", isPresented: $viewModel.showError) {
+            Button("OK") {
+                viewModel.showError = false
+            }
+        } message: {
+            Text(viewModel.error?.localizedDescription ?? "An unknown error occurred")
+        }
     }
     
     // MARK: - Actions
     
     private func copyToClipboard() {
-        print("Copy tapped")
         NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(transcribedText, forType: .string)
-        
-        // Visual feedback
-        withAnimation(.easeInOut(duration: 0.2)) {
-            // Could add a visual indicator here
-        }
+        NSPasteboard.general.setString(viewModel.currentText, forType: .string)
     }
     
     private func toggleRecording() {
-        print("Record button tapped")
-        isRecording.toggle()
-        
-        if isRecording {
-            print("Recording started")
-            // Start recording logic will go here
+        if viewModel.isRecording {
+            viewModel.stopRecording()
         } else {
-            print("Recording stopped")
-            // Stop recording logic will go here
-        }
-    }
-    
-    private func processMagicWand() {
-        print("Magic wand tapped")
-        isLoading = true
-        
-        // Simulate processing
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            isLoading = false
-            print("Magic wand processing complete")
+            viewModel.startRecording()
         }
     }
 }

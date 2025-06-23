@@ -10,6 +10,8 @@ import SwiftUI
 struct TextDisplayView: View {
     @Binding var text: String
     @Binding var isLoading: Bool
+    var placeholderText: String = "Tap the record button to get started"
+    var loadingMessage: String = "Loading..."
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
@@ -22,7 +24,7 @@ struct TextDisplayView: View {
             ZStack {
                 // Text display area
                 ScrollView {
-                    Text(text.isEmpty ? "Tap the record button to get started" : text)
+                    Text(text.isEmpty ? placeholderText : text)
                         .font(.system(size: 14))
                         .foregroundColor(text.isEmpty ? .secondary : .primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -41,7 +43,7 @@ struct TextDisplayView: View {
                 
                 // Loading overlay
                 if isLoading {
-                    LoadingOverlay()
+                    LoadingOverlay(message: loadingMessage)
                 }
             }
         }
@@ -61,16 +63,23 @@ struct TextDisplayView: View {
 }
 
 struct LoadingOverlay: View {
+    var message: String = "Loading..."
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
-                .fill(colorScheme == .dark ? Color.black.opacity(0.7) : Color.white.opacity(0.9))
+                .fill(colorScheme == .dark ? Color.black.opacity(0.8) : Color.white.opacity(0.9))
             
-            ProgressView()
-                .scaleEffect(1.2)
-                .progressViewStyle(CircularProgressViewStyle())
+            VStack(spacing: 12) {
+                ProgressView()
+                    .scaleEffect(1.2)
+                    .progressViewStyle(CircularProgressViewStyle())
+                
+                Text(message)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
         .allowsHitTesting(true)
     }
