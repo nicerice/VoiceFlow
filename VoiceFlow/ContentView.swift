@@ -10,6 +10,8 @@ import SwiftUI
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var transcribedText = ""
+    @State private var isRecording = false
+    @State private var isLoading = false
     
     var body: some View {
         VStack(spacing: 20) {
@@ -20,78 +22,99 @@ struct ContentView: View {
                 .padding(.top, 10)
             
             // Main content area
-            VStack(alignment: .leading, spacing: 8) {
-                Text("YOUR PROMPT")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.secondary)
-                    .tracking(0.5)
-                
-                // Text display area
-                ScrollView {
-                    Text(transcribedText.isEmpty ? "Tap the record button to get started" : transcribedText)
-                        .font(.system(size: 14))
-                        .foregroundColor(transcribedText.isEmpty ? .secondary : .primary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(12)
-                }
-                .frame(maxHeight: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(colorScheme == .dark ? Color.black.opacity(0.3) : Color.gray.opacity(0.05))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.gray.opacity(0.2), lineWidth: 1)
-                )
-            }
+            TextDisplayView(
+                text: $transcribedText,
+                isLoading: $isLoading
+            )
             .frame(maxHeight: .infinity)
             
             // Button row
             HStack(spacing: 30) {
-                // Copy button
-                Button(action: {}) {
-                    Image(systemName: "doc.on.doc")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.primary)
-                        .frame(width: 44, height: 44)
-                        .background(
-                            Circle()
-                                .fill(colorScheme == .dark ? Color.white.opacity(0.1) : Color.gray.opacity(0.1))
-                        )
-                }
-                .buttonStyle(.plain)
-                .disabled(transcribedText.isEmpty)
-                .opacity(transcribedText.isEmpty ? 0.5 : 1.0)
+                CopyButton(
+                    action: {
+                        copyToClipboard()
+                    },
+                    isEnabled: !transcribedText.isEmpty && !isLoading
+                )
                 
-                // Record button
-                Button(action: {}) {
-                    Image(systemName: "circle.fill")
-                        .font(.system(size: 40))
-                        .foregroundColor(.red)
-                        .frame(width: 44, height: 44)
-                }
-                .buttonStyle(.plain)
+                RecordButton(
+                    isRecording: $isRecording,
+                    action: {
+                        toggleRecording()
+                    }
+                )
+                .disabled(isLoading)
                 
-                // Magic wand button
-                Button(action: {}) {
-                    Image(systemName: "wand.and.rays")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.primary)
-                        .frame(width: 44, height: 44)
-                        .background(
-                            Circle()
-                                .fill(colorScheme == .dark ? Color.white.opacity(0.1) : Color.gray.opacity(0.1))
-                        )
-                }
-                .buttonStyle(.plain)
-                .disabled(transcribedText.isEmpty)
-                .opacity(transcribedText.isEmpty ? 0.5 : 1.0)
+                MagicWandButton(
+                    action: {
+                        processMagicWand()
+                    },
+                    isEnabled: !transcribedText.isEmpty && !isLoading
+                )
             }
             .padding(.bottom, 10)
+            
+            // Test buttons (development only)
+            #if DEBUG
+            HStack {
+                Button("Add Sample Text") {
+                    transcribedText = "This is a sample transcription text for testing purposes. It demonstrates how the text display looks with actual content."
+                }
+                .font(.caption)
+                
+                Button("Clear Text") {
+                    transcribedText = ""
+                }
+                .font(.caption)
+                
+                Button("Toggle Loading") {
+                    isLoading.toggle()
+                }
+                .font(.caption)
+            }
+            .padding(.bottom, 5)
+            #endif
         }
         .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(colorScheme == .dark ? Color.black : Color.white)
+    }
+    
+    // MARK: - Actions
+    
+    private func copyToClipboard() {
+        print("Copy tapped")
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(transcribedText, forType: .string)
+        
+        // Visual feedback
+        withAnimation(.easeInOut(duration: 0.2)) {
+            // Could add a visual indicator here
+        }
+    }
+    
+    private func toggleRecording() {
+        print("Record button tapped")
+        isRecording.toggle()
+        
+        if isRecording {
+            print("Recording started")
+            // Start recording logic will go here
+        } else {
+            print("Recording stopped")
+            // Stop recording logic will go here
+        }
+    }
+    
+    private func processMagicWand() {
+        print("Magic wand tapped")
+        isLoading = true
+        
+        // Simulate processing
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            isLoading = false
+            print("Magic wand processing complete")
+        }
     }
 }
 
