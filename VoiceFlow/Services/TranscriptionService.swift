@@ -118,7 +118,7 @@ class TranscriptionService: ObservableObject {
     
     // MARK: - Utility Methods
     
-    private func getFileSize(url: URL) -> Int64 {
+    func getFileSize(url: URL) -> Int64 {
         do {
             let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
             return attributes[.size] as? Int64 ?? 0
