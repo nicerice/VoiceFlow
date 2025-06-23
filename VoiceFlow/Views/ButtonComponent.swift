@@ -15,6 +15,7 @@ struct ButtonComponent: View {
     
     @State private var isPressed = false
     @State private var isHovered = false
+    @Environment(\.colorScheme) var colorScheme
     
     init(icon: String, 
          action: @escaping () -> Void, 
@@ -72,8 +73,6 @@ struct ButtonComponent: View {
     }
     
     private var backgroundColor: Color {
-        @Environment(\.colorScheme) var colorScheme
-        
         if icon == "circle.fill" || icon == "circle" {
             return .clear
         }
