@@ -6,54 +6,95 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @Environment(\.colorScheme) var colorScheme
+    @State private var transcribedText = ""
+    
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+        VStack(spacing: 20) {
+            // Title
+            Text("VOICE FLOW")
+                .font(.system(size: 28, weight: .bold, design: .default))
+                .tracking(2)
+                .padding(.top, 10)
+            
+            // Main content area
+            VStack(alignment: .leading, spacing: 8) {
+                Text("YOUR PROMPT")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .tracking(0.5)
+                
+                // Text display area
+                ScrollView {
+                    Text(transcribedText.isEmpty ? "Tap the record button to get started" : transcribedText)
+                        .font(.system(size: 14))
+                        .foregroundColor(transcribedText.isEmpty ? .secondary : .primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
                 }
-                .onDelete(perform: deleteItems)
+                .frame(maxHeight: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(colorScheme == .dark ? Color.black.opacity(0.3) : Color.gray.opacity(0.05))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.gray.opacity(0.2), lineWidth: 1)
+                )
             }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-            .toolbar {
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+            .frame(maxHeight: .infinity)
+            
+            // Button row
+            HStack(spacing: 30) {
+                // Copy button
+                Button(action: {}) {
+                    Image(systemName: "doc.on.doc")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(.primary)
+                        .frame(width: 44, height: 44)
+                        .background(
+                            Circle()
+                                .fill(colorScheme == .dark ? Color.white.opacity(0.1) : Color.gray.opacity(0.1))
+                        )
                 }
+                .buttonStyle(.plain)
+                .disabled(transcribedText.isEmpty)
+                .opacity(transcribedText.isEmpty ? 0.5 : 1.0)
+                
+                // Record button
+                Button(action: {}) {
+                    Image(systemName: "circle.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.red)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.plain)
+                
+                // Magic wand button
+                Button(action: {}) {
+                    Image(systemName: "wand.and.rays")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(.primary)
+                        .frame(width: 44, height: 44)
+                        .background(
+                            Circle()
+                                .fill(colorScheme == .dark ? Color.white.opacity(0.1) : Color.gray.opacity(0.1))
+                        )
+                }
+                .buttonStyle(.plain)
+                .disabled(transcribedText.isEmpty)
+                .opacity(transcribedText.isEmpty ? 0.5 : 1.0)
             }
-        } detail: {
-            Text("Select an item")
+            .padding(.bottom, 10)
         }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
+        .padding(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(colorScheme == .dark ? Color.black : Color.white)
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
