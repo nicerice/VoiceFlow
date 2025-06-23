@@ -8,6 +8,16 @@
 import Foundation
 import AVFoundation
 
+#if os(macOS)
+import AppKit
+
+// Custom permission enum for macOS compatibility
+enum AudioPermissionStatus {
+    case granted
+    case denied
+}
+#endif
+
 @MainActor
 class AudioRecorder: ObservableObject {
     private var audioEngine: AVAudioEngine?
@@ -16,7 +26,12 @@ class AudioRecorder: ObservableObject {
     private var recordingURL: URL?
     
     @Published var isRecording = false
+    
+    #if os(iOS)
     @Published var permissionStatus: AVAudioSession.RecordPermission = .denied
+    #else
+    @Published var permissionStatus: AudioPermissionStatus = .denied
+    #endif
     
     init() {
         checkPermissionStatus()
@@ -28,13 +43,23 @@ class AudioRecorder: ObservableObject {
         #if os(iOS)
         permissionStatus = AVAudioSession.sharedInstance().recordPermission
         #else
-        // On macOS, we'll assume permission is granted for now
-        // Real implementation would use AVCaptureDevice.authorizationStatus
-        permissionStatus = .granted
+        // On macOS, check microphone permission status
+        let status = AVCaptureDevice.authorizationStatus(for: .audio)
+        switch status {
+        case .authorized:
+            permissionStatus = .granted
+        case .denied, .restricted:
+            permissionStatus = .denied
+        case .notDetermined:
+            permissionStatus = .denied // We'll treat undetermined as denied initially
+        @unknown default:
+            permissionStatus = .denied
+        }
         #endif
     }
     
     func requestPermission() async -> Bool {
+        #if os(iOS)
         return await withCheckedContinuation { continuation in
             AVAudioSession.sharedInstance().requestRecordPermission { granted in
                 Task { @MainActor in
@@ -43,16 +68,27 @@ class AudioRecorder: ObservableObject {
                 }
             }
         }
+        #else
+        // On macOS, request microphone permission
+        return await withCheckedContinuation { continuation in
+            AVCaptureDevice.requestAccess(for: .audio) { granted in
+                Task { @MainActor in
+                    self.permissionStatus = granted ? .granted : .denied
+                    continuation.resume(returning: granted)
+                }
+            }
+        }
+        #endif
     }
     
     func ensurePermission() async throws {
-        #if os(iOS)
+        checkPermissionStatus() // Update current status
+        
         switch permissionStatus {
         case .granted:
             return
         case .denied:
-            throw VoiceFlowError.permissionDenied
-        case .undetermined:
+            // Try to request permission if it was denied
             let granted = await requestPermission()
             if !granted {
                 throw VoiceFlowError.permissionDenied
@@ -60,10 +96,6 @@ class AudioRecorder: ObservableObject {
         @unknown default:
             throw VoiceFlowError.permissionDenied
         }
-        #else
-        // On macOS, assume permission is handled by the system
-        return
-        #endif
     }
     
     // MARK: - Audio Session Management
