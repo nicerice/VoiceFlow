@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C6B7F8222E0987120054FEA2 /* voiceflow-spec.md in Resources */ = {isa = PBXBuildFile; fileRef = C6B7F8212E0987120054FEA2 /* voiceflow-spec.md */; };
+		C6B7F97D2E09AE6F0054FEA2 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = C6B7F97C2E09AE6F0054FEA2 /* WhisperKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C6B7F97D2E09AE6F0054FEA2 /* WhisperKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +120,7 @@
 			);
 			name = VoiceFlow;
 			packageProductDependencies = (
+				C6B7F97C2E09AE6F0054FEA2 /* WhisperKit */,
 			);
 			productName = VoiceFlow;
 			productReference = C6B7F7F42E095A950054FEA2 /* VoiceFlow.app */;
@@ -201,6 +204,9 @@
 			);
 			mainGroup = C6B7F7EB2E095A950054FEA2;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C6B7F97B2E09AE6F0054FEA2 /* XCRemoteSwiftPackageReference "WhisperKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C6B7F7F52E095A950054FEA2 /* Products */;
 			projectDirPath = "";
@@ -550,6 +556,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C6B7F97B2E09AE6F0054FEA2 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C6B7F97C2E09AE6F0054FEA2 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C6B7F97B2E09AE6F0054FEA2 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C6B7F7EC2E095A950054FEA2 /* Project object */;
 }

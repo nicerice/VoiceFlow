@@ -70,7 +70,7 @@ final class AppStateTests: XCTestCase {
         XCTAssertFalse(state.isLoading)
         XCTAssertTrue(state.canRecord)
         XCTAssertFalse(state.isRecording)
-        XCTAssertFalse(state.canProcessLLM)
+        XCTAssertTrue(state.canProcessLLM) // Can reprocess with different LLM settings
     }
     
     // Note: There is no error state in the actual AppState enum

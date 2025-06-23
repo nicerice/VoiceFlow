@@ -167,7 +167,12 @@ final class VoiceFlowUITests: XCTestCase {
     @MainActor
     func testAppStateAfterBackgrounding() throws {
         // Simulate app backgrounding and foregrounding
+        #if os(iOS)
         XCUIDevice.shared.press(.home)
+        #else
+        // On macOS, simulate hiding/showing the app
+        app.typeKey("h", modifierFlags: .command) // Command+H to hide
+        #endif
         
         // Wait briefly
         sleep(1)
